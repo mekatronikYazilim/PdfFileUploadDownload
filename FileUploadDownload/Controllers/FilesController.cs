@@ -56,20 +56,30 @@ namespace FileUploadDownload.Controllers
                 model.FileUrl = Url.Content(Path.Combine("~/UploadedFiles/", fileName));
                 model.FileName = fileName;
 
-                if (SaveFile(model))
+                if (files.ContentLength < 1048577) //dosya boyutu 1048576 byte yani 1 mb dan küçük olmalı
                 {
-                    files.SaveAs(path);
-                    TempData["AlertMessage"] = "Uploaded Successfully !!";
-                    return RedirectToAction("Index", "Files");
+                    if (SaveFile(model))
+                    {
+                        files.SaveAs(path);
+                        TempData["AlertMessage"] = "Başarılı bir şekilde yüklendi";
+                        return RedirectToAction("Index", "Files");
+                    }
+                    else
+                    {
+                        TempData["AlertMessage"] = "HATA! Yüklenirken bir hata oluştu, lütfen tekrar deneyin !!!";
+                    }
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Error In Add File. Please Try Again !!!");
+                    //ModelState.AddModelError("", "Dosya boyutu en fazla 1 MB olabilir");
+                    TempData["AlertMessage"] = "HATA! Dosya boyutu en fazla 1 MB olabilir !!";
+                    return RedirectToAction("Index", "Files");
+
                 }
             }
             else
             {
-                ModelState.AddModelError("", "Please Choose Correct File Type !!");
+                ModelState.AddModelError("", "Lütfen doğru dosya tipini seçin!!");
                 return View(model);
             }
             return RedirectToAction("Index", "Files");
@@ -96,7 +106,7 @@ namespace FileUploadDownload.Controllers
             SqlCommand command = new SqlCommand(strQry, con);
             int numResult = command.ExecuteNonQuery();
             con.Close();
-            if (numResult > 0)
+            if (numResult > 0 )
                 return true;
             else
                 return false;
@@ -121,9 +131,20 @@ namespace FileUploadDownload.Controllers
             return data;
         }
 
+        
         public ActionResult Delete(int id)
         {
-            string deleteElement= "select * from tblFileDetails where SQLID =' " + id +'"';
+            
+            using (SqlConnection con = new SqlConnection(conString))
+            {
+                con.Open();
+                string query = "delete from tblFileDetails where SQLID=@p1";
+                SqlCommand command = new SqlCommand(query,con);
+                command.Parameters.AddWithValue("@p1", id);
+                command.ExecuteNonQuery();
+                con.Close();
+                return RedirectToAction("Index");
+            }
 
         }
     }

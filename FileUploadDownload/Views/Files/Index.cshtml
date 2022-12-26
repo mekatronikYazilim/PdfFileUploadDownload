@@ -9,12 +9,12 @@
     @Html.AntiForgeryToken()
     <div class="row">
         <div class="col-md-10">
-            <h2>File Upload</h2>
+            <h2>Dosya yükle</h2>
             <hr />
             @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
             <div class="form-group">
-                <label class="col-md-2 control-label">Upload Image</label>
+                <label class="col-md-2 control-label">Dosya Yükle</label>
                 <div class="col-md-10">
                     <input type="file" id="files" name="files" class="form-control" required="required"><br />
                 </div>
@@ -22,8 +22,13 @@
 
             <div class="form-group">
                 <div class="col-md-offset-2 col-md-10">
-                    <input type="submit" value="Upload" class="btn btn-success" />
+                    <input type="submit" value="Upload" class="btn btn-success" style="margin-bottom:19px;" />
                 </div>
+                <br />
+            </div>
+            <div class="text-danger mt-2">
+                
+                <h3>@TempData["AlertMessage"]</h3>
             </div>
         </div>
     </div>
@@ -31,7 +36,7 @@
 
 <div class="row">
     <div class="col-md-10">
-        <h2>Uploaded File Details</h2>
+        <h2>Yüklenenler Listesi</h2>
         <div class="form-group">
             <div>
                 @{
@@ -44,10 +49,15 @@
                         columns: grid.Columns(
                             grid.Column("FileName", header: "FILE NAME", canSort: false),
                             grid.Column("FileUrl", header: "FILE PATH", canSort: false),
-                            grid.Column(header: "DOWNLOAD", format:
+                            grid.Column(header: "İNDİR", format:
                                     @<text>
-                                        <a href="~/Files/DownloadFile?filePath=@item.FileUrl"><img src="~/Images/download.png" style="width: 15px; height: 15px" title="Download" /></a>
+                                        <a class="btn btn-primary" href="~/Files/DownloadFile?filePath=@item.FileUrl">İNDİR</a>
+                                    </text>),
+                            grid.Column(header:"SİL", format:
+                                    @<text>
+                                        <a class="btn btn-danger" href="/Files/Delete?id=@item.FileId">SİL</a>
                                     </text>)
+
                       ));
                 }
             </div>
